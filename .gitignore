@@ -1,52 +1,282 @@
-# Prerequisites
-*.d
+#include <stdio.h>
+#include <stdlib.h>
 
-# Object files
-*.o
-*.ko
-*.obj
-*.elf
+struct Voiture {
+    int id;
+    char marque[50];
+    char modele[50];
+    int annee;
+    int disponible;
+};
 
-# Linker output
-*.ilk
-*.map
-*.exp
+struct Client {
+    int id;
+    char nom[50];
+    char telephone[15];
+    char adresse[100];
+    char email[50];
+};
 
-# Precompiled Headers
-*.gch
-*.pch
+void afficherMenu();
+void afficherVoitures(struct Voiture voitures[], int taille);
+void louerVoiture(struct Voiture voitures[], int taille, struct Client clients[], int tailleClients);
+void retournerVoiture(struct Voiture voitures[], int taille);
+void afficherClients(struct Client clients[], int taille);
+void ajouterClient(struct Client clients[], int *tailleClients);
+void ajouterVoiture(struct Voiture voitures[], int *tailleVoitures);
+void supprimerClient(struct Client clients[], int *tailleClients);
+void supprimerVoiture(struct Voiture voitures[], int *tailleVoitures);
+void modifierVoiture(struct Voiture voitures[], int taille);
 
-# Libraries
-*.lib
-*.a
-*.la
-*.lo
+int main() {
+    struct Voiture voitures[] = {
+        {1, "Toyota", "Camry", 2020, 1},
+        {2, "Honda", "Accord", 2019, 1},
+        {3, "Ford", "Mustang", 2021, 1},
+    };
 
-# Shared objects (inc. Windows DLLs)
-*.dll
-*.so
-*.so.*
-*.dylib
+    struct Client clients[10];
+    int nombreClients = 0;
+    int nombreVoitures = 3;
 
-# Executables
-*.exe
-*.out
-*.app
-*.i*86
-*.x86_64
-*.hex
+    int choix;
+    do {
+        afficherMenu();
+        printf("Votre choix : ");
+        scanf("%d", &choix);
 
-# Debug files
-*.dSYM/
-*.su
-*.idb
-*.pdb
+        switch (choix) {
+            case 1:
+                afficherVoitures(voitures, nombreVoitures);
+                break;
+            case 2:
+                louerVoiture(voitures, nombreVoitures, clients, nombreClients);
+                break;
+            case 3:
+                retournerVoiture(voitures, nombreVoitures);
+                break;
+            case 4:
+                afficherClients(clients, nombreClients);
+                break;
+            case 5:
+                ajouterClient(clients, &nombreClients);
+                break;
+            case 6:
+                ajouterVoiture(voitures, &nombreVoitures);
+                break;
+            case 7:
+                supprimerClient(clients, &nombreClients);
+                break;
+            case 8:
+                supprimerVoiture(voitures, &nombreVoitures);
+                break;
+            case 9:
+                modifierVoiture(voitures, nombreVoitures);
+                break;
+            case 10:
+                printf("Fin du programme.\n");
+                break;
+            default:
+                printf("Choix invalide. Veuillez réessayer.\n");
+        }
+    } while (choix != 10);
 
-# Kernel Module Compile Results
-*.mod*
-*.cmd
-.tmp_versions/
-modules.order
-Module.symvers
-Mkfile.old
-dkms.conf
+    return 0;
+}
+
+void afficherMenu() {
+    printf("\n===== Système de location de voitures =====\n");
+    printf("1. Afficher les voitures disponibles\n");
+    printf("2. Louer une voiture\n");
+    printf("3. Retourner une voiture\n");
+    printf("4. Afficher les voitures louées et les clients\n");
+    printf("5. Ajouter un client\n");
+    printf("6. Ajouter une voiture\n");
+    printf("7. Supprimer un client\n");
+    printf("8. Supprimer une voiture\n");
+    printf("9. Modifier les détails d'une voiture\n");
+    printf("10. Quitter\n");
+}
+
+void afficherVoitures(struct Voiture voitures[], int taille) {
+    printf("\nVoitures disponibles :\n");
+    for (int i = 0; i < taille; i++) {
+        if (voitures[i].disponible) {
+            printf("ID: %d, Marque: %s, Modèle: %s, Année: %d\n", voitures[i].id, voitures[i].marque, voitures[i].modele, voitures[i].annee);
+        }
+    }
+}
+
+void louerVoiture(struct Voiture voitures[], int taille, struct Client clients[], int tailleClients) {
+    int idVoiture;
+
+    printf("Entrez l'ID de la voiture à louer : ");
+    scanf("%d", &idVoiture);
+
+    int indiceVoiture = -1;
+    for (int i = 0; i < taille; i++) {
+        if (voitures[i].id == idVoiture) {
+            indiceVoiture = i;
+            break;
+        }
+    }
+
+    if (indiceVoiture == -1) {
+        printf("Aucune voiture avec cet ID n'a été trouvée.\n");
+        return;
+    }
+
+    if (voitures[indiceVoiture].disponible) {
+        voitures[indiceVoiture].disponible = 0;
+        printf("Voiture louée avec succès.\n");
+    } else {
+        printf("La voiture n'est pas disponible pour le moment.\n");
+    }
+}
+
+void retournerVoiture(struct Voiture voitures[], int taille) {
+    int idVoiture;
+
+    printf("Entrez l'ID de la voiture à retourner : ");
+    scanf("%d", &idVoiture);
+
+    int indiceVoiture = -1;
+    for (int i = 0; i < taille; i++) {
+        if (voitures[i].id == idVoiture) {
+            indiceVoiture = i;
+            break;
+        }
+    }
+
+    if (indiceVoiture == -1) {
+        printf("Aucune voiture avec cet ID n'a été trouvée.\n");
+        return;
+    }
+
+    if (!voitures[indiceVoiture].disponible) {
+        voitures[indiceVoiture].disponible = 1; 
+        printf("Voiture retournée avec succès.\n");
+    } else {
+        printf("La voiture n'est pas en location.\n");
+    }
+}
+
+void afficherClients(struct Client clients[], int taille) {
+    printf("\nClients enregistrés :\n");
+    for (int i = 0; i < taille; i++) {
+        printf("ID: %d, Nom: %s, Téléphone: %s, Adresse: %s, Email: %s\n", clients[i].id, clients[i].nom, clients[i].telephone, clients[i].adresse, clients[i].email);
+    }
+}
+
+void ajouterClient(struct Client clients[], int *tailleClients) {
+    if (*tailleClients < 10) {
+        (*tailleClients)++;
+        clients[*tailleClients - 1].id = *tailleClients;
+        printf("Nom du client : ");
+        scanf("%s", clients[*tailleClients - 1].nom);
+        printf("Numéro de téléphone : ");
+        scanf("%s", clients[*tailleClients - 1].telephone);
+        printf("Adresse : ");
+        scanf("%s", clients[*tailleClients - 1].adresse);
+        printf("Email : ");
+        scanf("%s", clients[*tailleClients - 1].email);
+        printf("Client ajouté avec succès.\n");
+    } else {
+        printf("Nombre maximal de clients atteint.\n");
+    }
+}
+
+void ajouterVoiture(struct Voiture voitures[], int *tailleVoitures) {
+    if (*tailleVoitures < 10) {
+        (*tailleVoitures)++;
+        voitures[*tailleVoitures - 1].id = *tailleVoitures;
+        printf("Marque de la voiture : ");
+        scanf("%s", voitures[*tailleVoitures - 1].marque);
+        printf("Modèle de la voiture : ");
+        scanf("%s", voitures[*tailleVoitures - 1].modele);
+        printf("Année de la voiture : ");
+        scanf("%d", &voitures[*tailleVoitures - 1].annee);
+        voitures[*tailleVoitures - 1].disponible = 1;
+        printf("Voiture ajoutée avec succès.\n");
+    } else {
+        printf("Nombre maximal de voitures atteint.\n");
+    }
+}
+
+void supprimerClient(struct Client clients[], int *tailleClients) {
+    int idSupprimer;
+    printf("ID du client à supprimer : ");
+    scanf("%d", &idSupprimer);
+
+    int indiceSupprimer = -1;
+    for (int i = 0; i < *tailleClients; i++) {
+        if (clients[i].id == idSupprimer) {
+            indiceSupprimer = i;
+            break;
+        }
+    }
+
+    if (indiceSupprimer != -1) {
+        for (int i = indiceSupprimer; i < *tailleClients - 1; i++) {
+            clients[i] = clients[i + 1];
+        }
+        (*tailleClients)--;
+        printf("Client supprimé avec succès.\n");
+    } else {
+        printf("Aucun client avec cet ID trouvé.\n");
+    }
+}
+
+void supprimerVoiture(struct Voiture voitures[], int *tailleVoitures) {
+    int idSupprimer;
+    printf("ID de la voiture à supprimer : ");
+    scanf("%d", &idSupprimer);
+
+    int indiceSupprimer = -1;
+    for (int i = 0; i < *tailleVoitures; i++) {
+        if (voitures[i].id == idSupprimer) {
+            indiceSupprimer = i;
+            break;
+        }
+    }
+
+    if (indiceSupprimer != -1) {
+        for (int i = indiceSupprimer; i < *tailleVoitures - 1; i++) {
+            voitures[i] = voitures[i + 1];
+        }
+        (*tailleVoitures)--;
+        printf("Voiture supprimée avec succès.\n");
+    } else {
+        printf("Aucune voiture avec cet ID trouvée.\n");
+    }
+}
+
+void modifierVoiture(struct Voiture voitures[], int taille) {
+    int idVoiture;
+
+    printf("Entrez l'ID de la voiture à modifier : ");
+    scanf("%d", &idVoiture);
+
+    int indiceVoiture = -1;
+    for (int i = 0; i < taille; i++) {
+        if (voitures[i].id == idVoiture) {
+            indiceVoiture = i;
+            break;
+        }
+    }
+
+    if (indiceVoiture == -1) {
+        printf("Aucune voiture avec cet ID n'a été trouvée.\n");
+        return;
+    }
+    printf("Entrez la nouvelle marque de la voiture : ");
+    scanf("%s", voitures[indiceVoiture].marque);
+
+    printf("Entrez le nouveau modèle de la voiture : ");
+    scanf("%s", voitures[indiceVoiture].modele);
+
+    printf("Entrez la nouvelle année de la voiture : ");
+    scanf("%d", &voitures[indiceVoiture].annee);
+
+    printf("Modification de la voiture avec ID %d effectuée avec succès.\n", idVoiture);
+}
